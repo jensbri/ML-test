@@ -186,6 +186,18 @@
 </div>
 <!--/div.accordion-flush-->
 
+<div class="accordion accordion-flush" id="accordionFlush3">
+  <div class="accordion-item">
+    <div class="accordion-header" id="flush-heading3">
+        <a href="regressionJens.html">2. Regression</a>
+    </div>
+<!--/div.accordion-header-->
+        
+  </div>
+<!--/div.accordion-item-->
+</div>
+<!--/div.accordion-flush-->
+
                 </div>
               </div>
             </div>
@@ -306,7 +318,7 @@ reinforce the objectives.</li>
   Instructor Note
   </h3>
 </button>
-<div id="collapseInstructor1" class="accordion-collapse collapse" data-bs-parent="#accordionInstructor1" aria-labelledby="headingInstructor1">
+<div id="collapseInstructor1" class="accordion-collapse collapse" aria-labelledby="headingInstructor1" data-bs-parent="#accordionInstructor1">
 <div class="accordion-body">
 <p>Inline instructor notes can help inform instructors of timing
 challenges associated with the lessons. They appear in the “Instructor
@@ -340,7 +352,7 @@ View”</p>
   Output
   </h4>
 </button>
-<div id="collapseSolution1" class="accordion-collapse collapse" data-bs-parent="#accordionSolution1" aria-labelledby="headingSolution1">
+<div id="collapseSolution1" class="accordion-collapse collapse" aria-labelledby="headingSolution1" data-bs-parent="#accordionSolution1">
 <div class="accordion-body">
 <div class="codewrapper">
 <h3 class="code-label">OUTPUT<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
@@ -371,7 +383,7 @@ challenge blocks?<a class="anchor" aria-label="anchor" href="#challenge2"></a>
   Show me the solution
   </h4>
 </button>
-<div id="collapseSolution2" class="accordion-collapse collapse" data-bs-parent="#accordionSolution2" aria-labelledby="headingSolution2">
+<div id="collapseSolution2" class="accordion-collapse collapse" aria-labelledby="headingSolution2" data-bs-parent="#accordionSolution2">
 <div class="accordion-body">
 <p>You can add a line with at least three colons and a
 <code>solution</code> tag.</p>
@@ -432,7 +444,551 @@ locally</li>
 Place links that you need to refer to multiple times across pages here. Delete
 any links that you are not going to use. 
  -->
-</section></section>
+</section></section><section id="aio-regressionJens"><p>Content from <a href="regressionJens.html">Regression</a></p>
+<hr>
+<p> Last updated on 2023-03-21 | 
+        
+        <a href="https://github.com/carpentries/workbench-template-rmd/edit/main/episodes/regressionJens.md" class="external-link">Edit this page <i aria-hidden="true" data-feather="edit"></i></a></p>
+<p>Estimated time <i aria-hidden="true" data-feather="clock"></i> 50 minutes </p>
+<div class="text-end">
+          <button role="button" aria-pressed="false" tabindex="0" id="expand-code" class="pull-right"> Expand All Solutions <i aria-hidden="true" data-feather="plus"></i></button>
+        </div>
+<p>Thoughts to be included longterm - some of the lengthy python code
+could be condensed into functions that we define and then call - maybe
+even put an interactive slider (scale 1-10) to select the degree of the
+polynomial - plot might be saved and reloaded as sub-plot? - fig, ax =
+plt.subplots() is more concise than this: fig = plt.figure() ax =
+fig.add_subplot(111)</p>
+<div class="section level1">
+<h1 id="step-0-setting-the-scene">Step 0: Setting the Scene<a class="anchor" aria-label="anchor" href="#step-0-setting-the-scene"></a>
+</h1>
+<ul>
+<li>in this episode, we will apply one of <em>the two big ML
+approaches</em>: Regression and classifiction (supervised)/clustering
+(unsupervised) which we will talk about in the next episodes</li>
+<li>imagine in a university-setting, you are frequently asked how hard
+an exam is, how much time to invest for its preparation and ultimately
+what restult to expect</li>
+<li>For this purpose, we fundamentally have to do two things:
+<ul>
+<li>Task 1: Create a hypothesis about what input we need to predit the
+exam result</li>
+<li>Task 2: Get data, build a <em>good</em> model to achieve our end
+goal of predicting quantitative values (here: The exam results, other
+similar examples are continuous values such as the price of a car, the
+weight of a dog).</li>
+</ul>
+</li>
+<li>We guess that a direct corellation exists between the hours spent
+studying for the exam and the result. That is our
+simplification/abstraction/hypothesis.</li>
+<li>while this simplified problem can be solved purely with
+hand-calculations (maths, statics), we want to establish a link to ML
+(best) practices (and continue doing so in the long run). This means
+that:
+<ul>
+<li>We will start with a clean dataset. That is unusual in practice.
+Often we have to consolidate several inputs into one neat table, for
+example. Some argue that this is of of the most time-consuming aspect
+while working with data.</li>
+<li>We will split an existing dataset into a training and a testing
+dataset. Remember, we do not follow classic analytic approaches where we
+define step by step what the algorithm has to do, we still define the
+basics (also called <em>hyper-parameters</em>), but in a true
+ML-fashion, the model is trained on data samples (where the
+<em>parameters</em>) are found and in a next step, the success (some
+refer to this as <em>accuracy</em> or <em>validity</em>) is
+evaluated.</li>
+<li>Though the maths/statics background is interesting, we will focus on
+using ML libraries such as Scikit Learn (sklearn) and will use
+predefined functions instead of creating these from scratch.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section level1">
+<h1 id="step-1-envisioned-model">Step 1: Envisioned Model<a class="anchor" aria-label="anchor" href="#step-1-envisioned-model"></a>
+</h1>
+<ul>
+<li>For Task 1, we form the hypothesis that we can predict exam results
+based on the hours of studying invested. Upon reflection we can imagine
+that there might be more to that; previous experience, procastinating
+while stuyding, etc. etc.<br>
+</li>
+<li>To create our dataset, we have collected some historic data by
+asking former students for the time spent preparing the exam and their
+results.</li>
+<li>Let’s firstly get an impression of our collected data. Maybe we
+identify some relationship (a trend, for exmaple) which will help us to
+come up with a prediction (such as: <em>you are likely to get this many
+points in the exam</em> based on the hours you plan to study for
+it)</li>
+<li>As an outlook, after we got an understanding of the data, we might
+find a simplification that we find most appropriate based on some of our
+data (the training data) and then gauge how well our prediction model
+performs by now feeding the testing data in, letting the algorithm
+perform its task and then compare predicted vs. actual values.</li>
+</ul>
+</div>
+<div class="section level1">
+<h1 id="step-2-get-data-and-visualise-it">Step 2: Get data and visualise it<a class="anchor" aria-label="anchor" href="#step-2-get-data-and-visualise-it"></a>
+</h1>
+<p>Lets get some training data and visualise it</p>
+<div class="codewrapper sourceCode" id="cb1">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>matplotlib inline</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt <span class="co"># good practice to import libraries firstly</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># The results from our data collection</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x_data <span class="op">=</span> [<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="fl">7.2</span>,<span class="dv">9</span>] <span class="co">#hours of learning</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>y_data <span class="op">=</span> [<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">10</span>,<span class="dv">13</span>,<span class="dv">15</span>] <span class="co">#test results</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># The visualiation starts here</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>plt.scatter(x_data, y_data, c<span class="op">=</span><span class="st">'k'</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'hours of learning'</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'test results 0 to 15, 15 being best'</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Scatter plot of all our collected data'</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre>
+</div>
+</div>
+<div class="section level1">
+<h1 id="step-3-split-dataset-into-training-and-testing-data">Step 3: Split dataset into Training and Testing data<a class="anchor" aria-label="anchor" href="#step-3-split-dataset-into-training-and-testing-data"></a>
+</h1>
+<div class="codewrapper sourceCode" id="cb2">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split <span class="co"># again, we use common ML libraries (yes, this task could be performed manually)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># we could write x_train, x_test, y_train, y_test but as we will mostly work with the training data for now, we just call x_train --&gt; x and y_train --&gt; y </span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>x, x_test, y, y_test <span class="op">=</span> train_test_split( </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>x_data, y_data, test_size<span class="op">=</span><span class="fl">0.25</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The x-values used to train our model on are: </span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Note the random sequence which is also good ML practice</span></span></code></pre>
+</div>
+</div>
+<div class="section level1">
+<h1 id="step-4-create-a-model">Step 4: Create a model<a class="anchor" aria-label="anchor" href="#step-4-create-a-model"></a>
+</h1>
+<p>Let’s have another look at the graph we created a few lines above. It
+seems tempting to simplify (in other words, to <em>approximate</em> or
+to <em>model</em>) the given points (also referred to as a <em>point
+cloud</em>) by one line. This is also referred to as <em>linear
+regression</em>.</p>
+<p>Let’s call this approximation by a carefully positioned line
+<strong>Use Case 1</strong> or <strong>UC1</strong> for short. Referring
+to maths, suitable values for <span class="math inline">\(m\)</span> and
+<span class="math inline">\(b\)</span> would have to be found for such a
+line given by an equation of <span class="math inline">\(y=mx
++c\)</span>.</p>
+<p>Another similar approach is called <em>polynomial regression</em>
+which means not a line but a curve will be fit. This concept has many
+(<em>poly</em>) names (<em>nom</em>) or in our case: <em>terms</em>. How
+many terms is determined by something called the <em>degree</em>. For a
+degree two (which describes the highest power or exponent in the related
+equation) we get <span class="math inline">\(y=ax^2 + bx
++c\)</span>.</p>
+<p>Therefore, the <em>linear regression</em> can be consdiered one
+special case of polynomial regression with a degree of one. So, still
+<span class="math inline">\(y=mx +c\)</span>. (A degree of five would
+entail and equation of <span class="math inline">\(y=ax^5 +bx^4
+\dots\)</span>). We will get back to polynomial regression soon.</p>
+</div>
+<div class="section level1">
+<h1 id="step-5-code-uc1-in-python-using-scikitlearn">Step 5: Code UC1 in Python using SciKitLearn<a class="anchor" aria-label="anchor" href="#step-5-code-uc1-in-python-using-scikitlearn"></a>
+</h1>
+<ul>
+<li>5.1 Create a linear regression model in Python</li>
+<li>5.2 Revisit the resulting equations and the plots, including the
+deviation as dotted lines</li>
+<li>5.3 Create a table with relevant statistical metrics
+<ul>
+<li>5.3.1 residuals (list)</li>
+<li>5.3.2 sum of residuals; highlighting how different signs might
+cancel each other out</li>
+<li>5.3.3 workaround to square the delta and root; or Python is in part
+(but not only) a fancy calculator, so just use the abs() function</li>
+<li>5.3.4 R-squared, exaplain, put more info from Youtube StatQuest</li>
+</ul>
+</li>
+</ul>
+<div class="codewrapper sourceCode" id="cb3">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use Case 1 - Linear Regression </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the fit line with degree 1 which means a LINEAR REGRESSION</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>Model_UC1 <span class="op">=</span> np.polyfit(x, y, deg<span class="op">=</span><span class="dv">1</span>) <span class="co"># this is the regession and we specify the degree to be 1</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>Equation_UC1 <span class="op">=</span> np.poly1d(Model_UC1) <span class="co"># poly1d helps us humans read the equation and makes several aspects callable from other functions</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The equation for UC1 is y = </span><span class="sc">{</span>Equation_UC1<span class="sc">}</span><span class="ss">"</span>) <span class="co"># We use f-notation which is a handy shortcut to print text and variables</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># the alternative would be </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># print('The euqation for UC1 is y =' +str(Equation_UC1))</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>myline <span class="op">=</span> np.linspace(<span class="dv">2</span>, <span class="dv">9</span>) <span class="co"># we use this to output evenly spaced numbers which helps us drawing a line </span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y, c<span class="op">=</span><span class="st">'k'</span>) <span class="co"># again, these could have been named x_test, etc. but this is easier; the colour is black, think CMYK printing where black is the keyline k</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>plt.plot(myline, Equation_UC1(myline),label<span class="op">=</span><span class="st">"linear Regression Results, of degree = 1"</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># the following lines provide textual descriptions for the plot</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Training Data Use Case 1 - UC1'</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'hours of studying'</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'test results'</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    plt.plot([x[i], x[i]], [Equation_UC1(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the plot</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre>
+</div>
+<p>While this looks quite good, it would be convenient to quantify how
+good this model/approximation/<em>the fit</em> is.</p>
+<p>We can’t go too deep into the statistics foundation but will make use
+of some predefined functions.</p>
+<p>Taking one step back, we want to answer students question about what
+exam result to expect. For our model, we only rely on one metric as an
+input which is the number of hours of studying. We expect that we have
+this direct <strong>corellation</strong> between hours of studying and
+exam results. In other words, we consider the hours of studying an
+important input to get a good prediction. For this step, we have to
+<strong>find a model</strong> that maps any kind number a particular
+student gives us for the hours of studying to a realsitic output.</p>
+<p>Alternatively, being lazy, we could also just provide the mean result
+as our prediction no matter what hour of studying a student tells
+us.</p>
+<p>Let’s first calculate the mean of the test results that for our
+current data set (i.e. the training data set) to have a foundation to
+compare against.</p>
+<p>Another important metric is the <em>coefficient of determination</em>
+which is often abbreviated as <em>R-squared</em></p>
+<p><span class="math display">\[R^2=\frac{\operatorname{Var}(\text {
+mean })-\operatorname{Var}(\text { line })}{\operatorname{Var}(\text {
+mean })}\]</span> $ ()$ is sum of the squared differences of the actual
+data values from the <strong>mean</strong> $ ()$ is sum of the squared
+differences of the actual data values from the <strong>fitted
+line</strong> this is then normed through dividing by $ ()$</p>
+<p><span class="math inline">\(R^2\)</span> values are on a scale of
+zero to one or can be interpreted as a percentage. For example, if <span class="math inline">\(R^2 = 81\%\)</span> this means that there is 81%
+less variation around the line than the mean. Or the given realtionship
+(hours of studying corellated with exam result) accounts for 81% of the
+variation. So most (81% to be exact) of the, variation in the data is
+explained by the hours/exam-results relationship. Which also means that
+our understanding that putting in more hours has a direct (but not 1:1)
+relationsihp with the exam-results is quite right. We can also say the
+relationship between the two variables explains 81% of the variation in
+the data. Again, we want to see if our identified realtionship is
+relevant. The disadvantage of <span class="math inline">\(R^2\)</span>
+is that squaring prevents us from saying the corellation is positive or
+negative. For many cases this is obvious. Not less studying means better
+exam results.</p>
+<div class="codewrapper sourceCode" id="cb4">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating the some metrics to gauge how well our model fits its underlying data </span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> r2_score, mean_squared_error</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> sqrt</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The mean prediction (y-value) based on our current dataset (training) is:  </span><span class="sc">{</span>np<span class="sc">.</span>mean(x)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>y_pred_UC1 <span class="op">=</span> np.poly1d(Equation_UC1)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>R2 <span class="op">=</span> r2_score(y, y_pred_UC1(x))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The R^2 score for UC1 is </span><span class="sc">{</span><span class="bu">round</span>(R2,<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> which is to be interpreted as a percentage of our relationship explaing the variation in data"</span>) </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> sqrt(mean_squared_error(y, y_pred_UC1(x)))</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The Root Mean Squared Error (RMSE) for UC1 is </span><span class="sc">{</span><span class="bu">round</span>(rmse,<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> we can understand this as the non sign-cancelling avearge devidation from data points to the line, an absolute distance!"</span>) </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span></code></pre>
+</div>
+<!-- #region -->
+</div>
+<div class="section level1">
+<h1 id="step-6-adjust-previous-code-degree-of-polynomial-regression-is-easily-adjustable">Step 6: Adjust previous code degree of polynomial regression is
+easily adjustable<a class="anchor" aria-label="anchor" href="#step-6-adjust-previous-code-degree-of-polynomial-regression-is-easily-adjustable"></a>
+</h1>
+</div>
+<div class="section level1">
+<h1 id="before-we-jump-into-uc2-lets-condense-previous-findings-the-plot-with-dotted-lines-and-the-previously-generated-metrics-as-one-plot-to-compare-against">Before we jump into UC2, let’s condense previous findings (the plot
+with dotted lines and the previously generated metrics as one plot to
+compare against)<a class="anchor" aria-label="anchor" href="#before-we-jump-into-uc2-lets-condense-previous-findings-the-plot-with-dotted-lines-and-the-previously-generated-metrics-as-one-plot-to-compare-against"></a>
+</h1>
+<p>UC2=2 UC3=5</p>
+<!-- #endregion -->
+<div class="codewrapper sourceCode" id="cb5">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use Case 2 - Polynomial Regression</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the fit line with degree 2 which means a Quadratic Regression</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>Model_UC2 <span class="op">=</span> np.polyfit(x, y, deg<span class="op">=</span><span class="dv">2</span>) <span class="co"># this is the regession and we specify the degree to be 1</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>Equation_UC2 <span class="op">=</span> np.poly1d(Model_UC2) <span class="co"># poly1d helps us humans read the equation and makes several aspects callable from other functions</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The equation for UC2 is y = </span><span class="sc">{</span>Equation_UC2<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Still using f-notation</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># myline = np.linspace(2, 9) # we use this to output evenly spaced numbers which helps us drawing a line </span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y, c<span class="op">=</span><span class="st">'k'</span>) </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>plt.plot(myline, Equation_UC2(myline),label<span class="op">=</span><span class="st">"Quadratic Regression Results, degree = 2"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># the following lines provide textual descriptions for the plot</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Training Data Use Case 2 - UC2'</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'hours of studying'</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'test results'</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    plt.plot([x[i], x[i]], [Equation_UC2(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the plot</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre>
+</div>
+<div class="codewrapper sourceCode" id="cb6">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The mean prediction (y-value) based on our current dataset (training) has not changed an is still:  </span><span class="sc">{</span>np<span class="sc">.</span>mean(x)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>y_pred_UC2 <span class="op">=</span> np.poly1d(Equation_UC2)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>R2 <span class="op">=</span> r2_score(y, y_pred_UC2(x))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The R^2 score is </span><span class="sc">{</span><span class="bu">round</span>(R2,<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> which is to be interpreted as a percentage of our relationship explaing the variation in data"</span>) </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> sqrt(mean_squared_error(y, y_pred_UC2(x)))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The Root Mean Squared Error (RMSE) is </span><span class="sc">{</span><span class="bu">round</span>(rmse,<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> we can understand this as the non sign-cancelling avearge devidation from data points to the line, an absolute distance!"</span>) </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span></code></pre>
+</div>
+<p>Note the curvature of the line. Also note that the metrics haven’t
+changed a lot, they even got worse (which is in part due to the small
+scale of our dataset)</p>
+<div class="codewrapper sourceCode" id="cb7">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use Case 3 - Polynomial Regression with higher degree</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the fit line with degree 5</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>Model_UC3 <span class="op">=</span> np.polyfit(x, y, deg<span class="op">=</span><span class="dv">5</span>) <span class="co"># this is the regession and we specify the degree to be 1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>Equation_UC3 <span class="op">=</span> np.poly1d(Model_UC3) <span class="co"># poly1d helps us humans read the equation and makes several aspects callable from other functions</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The equation for UC3 is y = </span><span class="sc">{</span>Equation_UC3<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Still using f-notation</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># myline = np.linspace(2, 9) # we use this to output evenly spaced numbers which helps us drawing a line </span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y, c<span class="op">=</span><span class="st">'k'</span>) </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.plot(myline, Equation_UC3(myline),label<span class="op">=</span><span class="st">"Regression Results, degree = 5"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># the following lines provide textual descriptions for the plot</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Training Data Use Case 3 - UC3'</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'hours of studying'</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'test results'</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    plt.plot([x[i], x[i]], [Equation_UC3(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the plot</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre>
+</div>
+<div class="codewrapper sourceCode" id="cb8">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The mean prediction (y-value) based on our current dataset (training) has not changed an is still:  </span><span class="sc">{</span>np<span class="sc">.</span>mean(x)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>y_pred_UC3 <span class="op">=</span> np.poly1d(Equation_UC3)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>R2 <span class="op">=</span> r2_score(y, y_pred_UC3(x))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The R^2 score is </span><span class="sc">{</span><span class="bu">round</span>(R2,<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> which is to be interpreted as a percentage of our relationship explaing the variation in data"</span>) </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> sqrt(mean_squared_error(y, y_pred_UC3(x)))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The Root Mean Squared Error (RMSE) is </span><span class="sc">{</span><span class="bu">round</span>(rmse,<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> we can understand this as the non sign-cancelling avearge devidation from data points to the line, an absolute distance!"</span>) </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>()</span></code></pre>
+</div>
+<p>Note the hint that Python gives us: <em>RankWarning: Polyfit may be
+poorly conditioned</em></p>
+<p>Also note how this cuved line hits all the data points it <em>knew
+of</em></p>
+<p>This is reflected in our metrics where <span class="math inline">\(R^2\)</span> is 100% and the RMSE = 0.</p>
+<p>Question: Did we generate the perfect model to predict exam outcomes
+based on historic data collection of hours spent for preparing the exam
+using the formula given by ‘Equation_UC3’?</p>
+<p>POP OUT BOX: TRY IN THEIR OWN TIME DEGREE OF: 9, 17, 35</p>
+</div>
+<div class="section level1">
+<h1 id="step-7-taking-one-step-back-and-comparing-these-results">Step 7: Taking one step back and comparing these results<a class="anchor" aria-label="anchor" href="#step-7-taking-one-step-back-and-comparing-these-results"></a>
+</h1>
+<p>We could dedut from our previous setps that the higher the degree,
+the better the prediction.</p>
+<p>Let’s see all three use-cases in one plot.</p>
+<p>And also get each model’s prediction for a student enquiring about
+the predicted exam result based o <strong>8h of studying</strong>. This
+value wasn’t part of our training dataset.</p>
+<div class="codewrapper sourceCode" id="cb9">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Overview Plot</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>ax.scatter(x, y, c<span class="op">=</span><span class="st">'k'</span>) </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>ax.plot(myline, Equation_UC1(myline), color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">"linear Regression Results, of degree = 1"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">8</span>,Equation_UC1(<span class="dv">8</span>),color<span class="op">=</span><span class="st">'blue'</span>, marker<span class="op">=</span><span class="st">'o'</span>, markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="bu">round</span>(Equation_UC1(<span class="dv">8</span>),<span class="dv">2</span>),xy<span class="op">=</span>(<span class="dv">8</span>,(Equation_UC1(<span class="dv">8</span>)<span class="op">-</span><span class="dv">2</span>)))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    ax.plot([x[i], x[i]], [Equation_UC1(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>ax.plot(myline, Equation_UC2(myline),color<span class="op">=</span><span class="st">'orange'</span>, label<span class="op">=</span><span class="st">"linear Regression Results, of degree = 2"</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">8</span>,Equation_UC2(<span class="dv">8</span>),color<span class="op">=</span><span class="st">'orange'</span>, marker<span class="op">=</span><span class="st">'o'</span>, markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="bu">round</span>(Equation_UC2(<span class="dv">8</span>),<span class="dv">2</span>),xy<span class="op">=</span>(<span class="dv">8</span>,(Equation_UC2(<span class="dv">8</span>)<span class="op">-</span><span class="dv">2</span>)))</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    ax.plot([x[i], x[i]], [Equation_UC2(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>ax.plot(myline, Equation_UC3(myline),color<span class="op">=</span><span class="st">'green'</span>, label<span class="op">=</span><span class="st">"linear Regression Results, of degree = 5"</span>)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">8</span>,Equation_UC3(<span class="dv">8</span>),color<span class="op">=</span><span class="st">'green'</span>, marker<span class="op">=</span><span class="st">'o'</span>, markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="bu">round</span>(Equation_UC3(<span class="dv">8</span>),<span class="dv">2</span>),xy<span class="op">=</span>(<span class="dv">8</span>,(Equation_UC3(<span class="dv">8</span>)<span class="op">-</span><span class="dv">2</span>)))</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    ax.plot([x[i], x[i]], [Equation_UC3(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Annotaiton as text box</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co"># props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.text(2, 15, f"points show predicted exam results based on 8h of studying per UC", fontsize=8, verticalalignment='top', bbox=props)</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>ax.axis(ymin<span class="op">=</span><span class="dv">0</span>,ymax<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>ax.grid()</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'hours of studying'</span>)</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'test results'</span>)</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Overview, points show predicted exam results based on 8h of studying per UC'</span>)</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a></span></code></pre>
+</div>
+</div>
+<div class="section level1">
+<h1 id="step-8-now-put-the-testing-dataset-into-place">Step 8: Now put the testing dataset into place<a class="anchor" aria-label="anchor" href="#step-8-now-put-the-testing-dataset-into-place"></a>
+</h1>
+<div class="codewrapper sourceCode" id="cb10">
+<h3 class="code-label">PYTHON<i aria-hidden="true" data-feather="chevron-left"></i><i aria-hidden="true" data-feather="chevron-right"></i>
+</h3>
+<pre class="sourceCode python" tabindex="0"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The x-values used to train our model on are: </span><span class="sc">{</span>x<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Note the random sequence which is also good ML practice</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The x-values used to test our model on are: </span><span class="sc">{</span>x_test<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Note the random sequence which is also good ML practice</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The predictions based on UC1 are: </span><span class="sc">{</span>y_pred_UC1(x_test)<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Note the random sequence which is also good ML practice</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The predictions based on UC2 are: </span><span class="sc">{</span>y_pred_UC2(x_test)<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Note the random sequence which is also good ML practice</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"The predictions based on UC3 are: </span><span class="sc">{</span>y_pred_UC3(x_test)<span class="sc">}</span><span class="ss">"</span>) <span class="co"># Note the random sequence which is also good ML practice</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># START UGLY COPY PASTE WORKAROUND</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>ax.scatter(x, y, c<span class="op">=</span><span class="st">'k'</span>) </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>ax.plot(myline, Equation_UC1(myline), color<span class="op">=</span><span class="st">'blue'</span>, label<span class="op">=</span><span class="st">"linear Regression Results, of degree = 1"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">8</span>,Equation_UC1(<span class="dv">8</span>),color<span class="op">=</span><span class="st">'blue'</span>, marker<span class="op">=</span><span class="st">'o'</span>, markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="bu">round</span>(Equation_UC1(<span class="dv">8</span>),<span class="dv">2</span>),xy<span class="op">=</span>(<span class="dv">8</span>,(Equation_UC1(<span class="dv">8</span>)<span class="op">-</span><span class="dv">2</span>)))</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    ax.plot([x[i], x[i]], [Equation_UC1(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>ax.plot(myline, Equation_UC2(myline),color<span class="op">=</span><span class="st">'orange'</span>, label<span class="op">=</span><span class="st">"linear Regression Results, of degree = 2"</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">8</span>,Equation_UC2(<span class="dv">8</span>),color<span class="op">=</span><span class="st">'orange'</span>, marker<span class="op">=</span><span class="st">'o'</span>, markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="bu">round</span>(Equation_UC2(<span class="dv">8</span>),<span class="dv">2</span>),xy<span class="op">=</span>(<span class="dv">8</span>,(Equation_UC2(<span class="dv">8</span>)<span class="op">-</span><span class="dv">2</span>)))</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    ax.plot([x[i], x[i]], [Equation_UC2(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>ax.plot(myline, Equation_UC3(myline),color<span class="op">=</span><span class="st">'green'</span>, label<span class="op">=</span><span class="st">"linear Regression Results, of degree = 5"</span>)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>ax.plot(<span class="dv">8</span>,Equation_UC3(<span class="dv">8</span>),color<span class="op">=</span><span class="st">'green'</span>, marker<span class="op">=</span><span class="st">'o'</span>, markersize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="bu">round</span>(Equation_UC3(<span class="dv">8</span>),<span class="dv">2</span>),xy<span class="op">=</span>(<span class="dv">8</span>,(Equation_UC3(<span class="dv">8</span>)<span class="op">-</span><span class="dv">2</span>)))</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the error lines</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(x)):</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    ax.plot([x[i], x[i]], [Equation_UC3(x[i]), y[i]], <span class="st">'--k'</span>)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Annotaiton as text box</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="co"># props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.text(2, 15, f"points show predicted exam results based on 8h of studying per UC", fontsize=8, verticalalignment='top', bbox=props)</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>ax.axis(ymin<span class="op">=</span><span class="dv">0</span>,ymax<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>ax.grid()</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'hours of studying'</span>)</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'test results'</span>)</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'Overview, points show predicted exam results based on 8h of studying per UC'</span>)</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="re">END</span><span class="co"> UGLY COPY PASTE WORKAROUND</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a><span class="co"># ax.scatter(x, y, c='k') # again, these could have been named x_test, etc. but this is easier; the colour is black, think CMYK printing where black is the keyline k</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>ax.scatter(x_test, y_test, c<span class="op">=</span><span class="st">'b'</span>)</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.show</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a><span class="co"># print (y_test)</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a><span class="co"># print(y_pred_UC1(x_test))</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a><span class="co"># print(y_pred_UC2(x_test))</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a><span class="co"># print(y_pred_UC3(x_test))</span></span></code></pre>
+</div>
+</div>
+<div class="section level1">
+<h1 id="step-9-compare-training-testing-over-and-underfitting">Step 9: Compare training, testing: Over and underfitting<a class="anchor" aria-label="anchor" href="#step-9-compare-training-testing-over-and-underfitting"></a>
+</h1>
+<p>We could put all this into a nice Pandas dataframe - Table Column 1 =
+Degree - Table Column 2 = Training RMSE - Table Column 3 = Training R^2
+- Table Column 4 = Testing RMSE - Table Column 5 = Testing R^2</p>
+</div>
+<div class="section level1">
+<h1 id="step-10-reflect-on-these-previous-results">Step 10: Reflect on these previous results<a class="anchor" aria-label="anchor" href="#step-10-reflect-on-these-previous-results"></a>
+</h1>
+<ul>
+<li>while looking at training dataset in isolation, the higher the
+degree the better, as the curve hits all the points</li>
+<li>but as soon as we get to the testing dataset, we see discrepancy,
+that is called <strong>overfitting</strong>.</li>
+<li>This means, our model that is overfitted to the training data set
+has a low <strong>bias</strong> (as it never systematically over or
+underestimates the values, especially true for models with high
+polynomial degree). From another perspective, we can say that they don’t
+reflect the reality and are only overfitted to an artificial abstraction
+(for more complicated ML tasks it is also said that the ML model might
+<em>remember</em> the training set too well)</li>
+<li>Another important metric, the <strong>variance</strong> tells us how
+well the model performs across different datasets. Here, the linear
+regression is very good. We can also call it robust.</li>
+<li>So we have to consider all these aspects; and especially for more
+complex ML tasks where we can’t just visualise the 2D or 3D relationship
+with a simple plot, we have to be very careful; in other words: We won’t
+be able to tell as easily in the realm of ML what errors we made during
+the model creation for models invovling more dimensions (which most
+do)</li>
+<li>AND remember: <em>Garbage in, Garbage out</em> and <em>correlation
+isn’t a sign for causality</em>, just because almost every winner in the
+olympic games drank water, drinking heaps of water won’t make you an
+olympic winner.
+<ul>
+<li>for some ML tasks it is even worse: The telco provider who knows
+that some customers will cancel their contract in the next few months
+might not know at all: WHY and WHAT TO DO AGAINST THAT.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section level1">
+<h1 id="step-11-outlook">Step 11: Outlook<a class="anchor" aria-label="anchor" href="#step-11-outlook"></a>
+</h1>
+<ul>
+<li>for neuronal networks: non linear activation functions (ReLu,
+Sigmoid, … )</li>
+<li>next step: classification and categorisation and clustering (the
+three c’s)</li>
+</ul>
+<!-- 
+Place links that you need to refer to multiple times across pages here. Delete
+any links that you are not going to use. 
+ -->
+</div></section>
 </div>
     </main>
 </div>
