@@ -1,5 +1,5 @@
-<kbd>Shift</kbd> Enter - execute the current cell
-<kbd>ctrl</kbd> Enter  - autocomplete
+<kbd>Shift</kbd> <kbd>Enter</kbd> - execute the current cell
+<kbd>ctrl</kbd> <kbd>Enter</kbd>  - autocomplete
 
 <kbd>cmd</kbd>/<kbd>ctrl</kbd> <kbd>Shift</kbd> <kbd>p</kbd> - Show command palette
 
@@ -15,5 +15,7 @@
 
 ## Get help:
 Put a question mark at the end: `numpy.loadtxt?`
+
 Wait while in the parentheses: `numpy.loadtxt()`
+
 Explictily call the help function `help(numpy.loadtxt)`,
