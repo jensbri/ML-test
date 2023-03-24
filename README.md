@@ -1,3 +1,4 @@
+## Important Shortcuts for Google Colab
 <kbd>Shift</kbd> <kbd>Enter</kbd> - execute the current cell
 <kbd>ctrl</kbd> <kbd>Enter</kbd>  - autocomplete
 
