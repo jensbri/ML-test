@@ -1,6 +1,7 @@
 ## Important Shortcuts for Google Colab
 <kbd>Shift</kbd> <kbd>Enter</kbd> - execute the current cell
 
+
 <kbd>ctrl</kbd> <kbd>Enter</kbd>  - autocomplete
 
 <kbd>cmd</kbd>/<kbd>ctrl</kbd> <kbd>Shift</kbd> <kbd>p</kbd> - Show command palette
