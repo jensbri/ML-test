@@ -18,4 +18,4 @@ Put a question mark at the end: `numpy.loadtxt?`
 
 Wait while in the parentheses: `numpy.loadtxt()`
 
-Explictily call the help function `help(numpy.loadtxt)`,
+Explictily call the help function `help(numpy.loadtxt)`
