@@ -19,6 +19,8 @@ exercises: 2
 
 ## Introduction
 
+
+
 This is a lesson created via The Carpentries Workbench. It is written in
 [Pandoc-flavored Markdown](https://pandoc.org/MANUAL.txt) for static files and
 [R Markdown][r-markdown] for dynamic files that can render code into output. 
@@ -48,7 +50,7 @@ associated with the lessons. They appear in the "Instructor View"
 
 What is the output of this command?
 
-```r
+```python
 paste("This", "new", "lesson", "looks", "good")
 ```
 
@@ -59,6 +61,9 @@ paste("This", "new", "lesson", "looks", "good")
 ```output
 [1] "This new lesson looks good"
 ```
+
+
+
 
 :::::::::::::::::::::::::::::::::
 
