@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.2.2",
+    "Version": "4.1.2",
     "Repositories": [
       {
         "Name": "carpentries",
@@ -264,13 +264,14 @@
       "Version": "0.17.0-38",
       "Source": "Repository",
       "Repository": "https://carpentries.r-universe.dev",
+      "RemoteType": "repository",
       "RemoteUrl": "https://github.com/rstudio/renv",
       "RemoteRef": "0.17.0-38",
       "RemoteSha": "fd9181395e13652d2b3dc942ac1bf807e9564c25",
       "Requirements": [
         "utils"
       ],
-      "Hash": "4a11fe072b17cd901835053b25821a7f"
+      "Hash": "883fcb30a0c9c37a3105bb393d72c175"
     },
     "rlang": {
       "Package": "rlang",
@@ -324,7 +325,7 @@
       "Package": "stringi",
       "Version": "1.7.12",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "https://carpentries.r-universe.dev",
       "RemoteType": "repository",
       "RemoteUrl": "https://github.com/gagolews/stringi",
       "RemoteRef": "v1.7.12",
